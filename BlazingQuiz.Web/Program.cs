@@ -19,7 +19,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddSingleton<QuizAuthStateProvider>();
-builder.Services.AddSingleton<AuthenticationStateProvider>(sp=>sp.GetRequiredService<QuizAuthStateProvider>());
+builder.Services.AddSingleton<AuthenticationStateProvider>(sp => sp.GetRequiredService<QuizAuthStateProvider>());
 builder.Services.AddAuthorizationCore();
 //_________________________________________End________________________________________________________________________//
 
@@ -38,9 +38,24 @@ static void ConfigureRefit(IServiceCollection services)
     const string ApiBaseUrl = "https://localhost:7192";
 
     // RefitClient ekliyoruz ve IAuthApi arayüzünü kullanarak HTTP istemcisini yapýlandýrýyoruz
-    services.AddRefitClient<IAuthApi>()
-        .ConfigureHttpClient(httpClient =>
-            // HTTP istemcisinin temel adresini belirliyoruz
-            httpClient.BaseAddress = new Uri(ApiBaseUrl));
+    services.AddRefitClient<IAuthApi>(GetRefitSettings)
+        .ConfigureHttpClient(SetHttpClient);
+
+    services.AddRefitClient<ICategoryApi>(GetRefitSettings)
+         .ConfigureHttpClient(SetHttpClient);
+
+    // HTTP istemcisinin temel adresini belirliyoruz
+    static void SetHttpClient(HttpClient httpClient) =>
+        httpClient.BaseAddress = new Uri(ApiBaseUrl);
+
+    static RefitSettings GetRefitSettings(IServiceProvider sp)
+    {
+        var authStateProvider=sp.GetRequiredService<QuizAuthStateProvider>();
+
+        return new RefitSettings
+        {
+            AuthorizationHeaderValueGetter = (_, __) => Task.FromResult(authStateProvider.User?.Token ?? "")
+        };
+    }
 }
 //_________________________________________End________________________________________________________________________//

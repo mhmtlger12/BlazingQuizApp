@@ -28,7 +28,8 @@ builder.Services.AddDbContext<QuizContext>(options =>
 //_________________________________________Start________________________________________________________________________//
 
 // AuthService sýnýfýný baðýmlýlýk olarak kaydeder ve her istek için yeni bir örnek oluþturur. Bu sayede AuthService sýnýfýný DI(dependency injection) konteyneri üzerinden uygulamanýn herhangi bir yerinde kullanabiliriz.
-builder.Services.AddTransient<AuthService>();
+builder.Services.AddTransient<AuthService>()
+    .AddTransient<CategoryService>();
 
 //_________________________________________End________________________________________________________________________//
 
@@ -70,6 +71,9 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
     };
 });
+
+//AddAuthorization
+builder.Services.AddAuthorization();
 //_________________________________________End________________________________________________________________________//
 
 
@@ -118,9 +122,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//Endpoints dahil ediyoruz.BlazingQuiz.Api\Endpoints\AuthEndpoints.cs
-app.MapAuthEndpoints();
-app.UseAuthentication();
+//Endpoints dahil ediyoruz.BlazingQuiz.Api\Endpoints\
+app.MapAuthEndpoints()
+    .MapCategoryEndPoints();
+app.UseAuthentication()
+    .UseAuthorization();
 app.UseCors();
 app.Run();
 
