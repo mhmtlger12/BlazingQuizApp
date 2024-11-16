@@ -1,4 +1,6 @@
 using BlazingQuiz.Api.Data;
+using BlazingQuiz.Api.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,20 +9,20 @@ builder.Services.AddSwaggerGen();
 
 
 // appsettings.json dosyasýndaki "Quiz" baðlantý dizesini kullanarak veritabaný baðlamýný yapýlandýrdýk.
+builder.Services.AddTransient<IPasswordHasher<User>, PasswordHasher<User>>();
+
 builder.Services.AddDbContext<QuizContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Quiz");
     options.UseSqlServer(connectionString);
 });
 
+var app = builder.Build();
 
-
-
-
-
-
-
-var app = builder.Build(); 
+//yalnýzca debug modunda çalýþtýrýlmasýný saðlar. Böylece geliþtirme sýrasýnda veritabaný güncellenir, ancak üretim ortamýnda bu iþlem yapýlmaz.
+#if DEBUG
+AppleyDbMigrations(app.Services);
+#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -31,29 +33,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+//Debug modundayken uodate-database yapmak yerine, yeni migration varsa  bunu api  ayaða kaldýrýrken kendisi update database yapýyor. 
+static void AppleyDbMigrations(IServiceProvider sp)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    var scope = sp.CreateScope(); // Baðýmlýlýk çözümleme için yeni bir kapsam (scope) oluþturuyoruz.
+    var context = scope.ServiceProvider.GetRequiredService<QuizContext>(); // Yeni oluþturulan kapsam üzerinden QuizContext örneðini alýyoruz.
+    if (context.Database.GetPendingMigrations().Any()) // Bekleyen migration olup olmadýðýný kontrol ediyoruz.
+    {
+        context.Database.Migrate(); // Bekleyen migrationlarý uygular.
+    }
 }
+
