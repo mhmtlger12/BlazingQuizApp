@@ -28,8 +28,6 @@ namespace BlazingQuiz.Web.Auth
         public LoggedInUser User { get; private set; }
         public bool IsLoggedIn => User?.Id > 0;
 
-        public IJSRuntime JsRuntime { get; }
-
         public async Task SetLoginAsync(LoggedInUser user)
         {
             User = user;

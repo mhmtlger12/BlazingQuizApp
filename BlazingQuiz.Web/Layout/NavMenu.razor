@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject QuizAuthStateProvider QuizAuthStateProvider
+ 
+@inject NavigationManager NavigationManager
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BlazingQuiz.Web</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -11,19 +14,43 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Ana Sayfa
             </NavLink>
         </div>
+        <AuthorizeView>
+            <Authorized>
+                <AuthorizeView Roles="@(nameof(UserRole.Admin))" Context="adminContext">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin/manage-quizes">
+                            Testleri Yönet 
+                        </NavLink>
+                    </div>
+
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin/add-quiz">
+                            Yeni Test
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
+                <AuthorizeView Roles="@(nameof(UserRole.Student))" Context="studentContext">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="student/my-quizes">
+                            Sınavlarım
+                        </NavLink>
+                    </div>
+
+                </AuthorizeView>
+            </Authorized>
+        </AuthorizeView>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
+            <a role="button" class="nav-link" @onclick="LogoutAsync">
+                Çıkış Yap
+            </a>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+
+
+
+
     </nav>
 </div>
 
@@ -35,5 +62,11 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+    private async Task LogoutAsync()
+    {
+        await QuizAuthStateProvider.SetLogoutAsync();
+        NavigationManager.NavigateTo("auth/login", replace: true);
+
     }
 }
