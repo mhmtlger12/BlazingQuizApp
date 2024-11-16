@@ -1,7 +1,31 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+@inject QuizAuthStateProvider QuizAuthStateProvider
+<PageTitle>Ana Sayfa</PageTitle>
 
-Welcome to your new app.
+<h1>Merhaba,@QuizAuthStateProvider.User?.Name</h1>
+
+<AuthorizeView>
+    <Authorizing>
+        <p>
+            Yetkilendiriyor..
+        </p>
+
+    </Authorizing>
+    <NotAuthorized>
+
+        <p>
+            Yetkili Değil
+        </p>
+    </NotAuthorized>
+
+    <Authorized>
+        <p>
+            Yetkili:@context.User.Claims.FirstOrDefault(c=>c.Type==ClaimTypes.Name)?.Value
+        </p>
+    </Authorized>
+</AuthorizeView>
+@code {
+
+}

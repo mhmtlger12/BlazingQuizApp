@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject QuizAuthStateProvider QuizAuthStateProvider
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -10,7 +11,28 @@
         </div>
 
         <article class="content px-4">
-            @Body
+            @if(QuizAuthStateProvider.IsInitializing)
+            {
+                <p>Durum başlatılıyor...</p> <!-- Eğer oturum durumu başlatılıyor ise bir mesaj gösterir -->
+            }
+            else
+            {
+                @Body
+
+                <!-- Eğer başlatma tamamlandıysa, içeriği render eder -->
+            }
+          
         </article>
     </main>
 </div>
+@code{
+    protected override async Task OnInitializedAsync()
+    {
+        // QuizAuthStateProvider'da başlatma işlemi tamamlanana kadar bekler.
+        while (QuizAuthStateProvider.IsInitializing)
+        {
+            // Durumu her 500 milisaniyede bir kontrol eder.
+            await Task.Delay(500);
+        }
+    }
+}

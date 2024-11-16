@@ -9,7 +9,7 @@ namespace BlazingQuiz.Shared.DTOs
 {
     // AuthResponseDto, kimlik doğrulama işlemi sonucu döndürülecek yanıtı temsil eder.
     // Bu sınıf, token ve hata mesajı (opsiyonel) içerir.
-    public record AuthResponseDto(string Token, string? ErrorMessage = null)
+    public record AuthResponseDto(LoggedInUser User, string? ErrorMessage = null)
     {
         // HasError özelliği, hata mesajı olup olmadığını kontrol eder.
         [JsonIgnore]

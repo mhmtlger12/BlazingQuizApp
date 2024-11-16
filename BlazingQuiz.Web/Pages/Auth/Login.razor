@@ -3,6 +3,7 @@
 
 @inject NavigationManager NavigationManager
 @inject IAuthApi AauthApi
+@inject QuizAuthStateProvider QuizAuthStateProvider
 
 <div class="container">
     <div class="row vh-100">
@@ -12,6 +13,26 @@
                     Giriş Ekranı - QuizApp
                 </h1>
             </div>
+            <AuthorizeView>
+                <Authorizing>
+                    <p>
+                        Yetkilendiriyor..
+                    </p>
+
+                </Authorizing>
+                <NotAuthorized>
+
+                    <p>
+                        Yetkili Değil
+                    </p>
+                </NotAuthorized>
+
+                <Authorized>
+                    <p>
+                        Yetkili:@context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
+                    </p>
+                </Authorized>
+            </AuthorizeView>
             <hr />
             <EditForm Model="_model" OnValidSubmit="LoginAsync">
                 <DataAnnotationsValidator />
@@ -92,6 +113,10 @@
             // Örnek: Set login info in some storage (local storage, session, etc.)
             // Navigate To ProtectedPage
             //giri başarılı olursa ana safaya atıyoruz
+            var loggedInUser = authResponse.User;
+
+           await QuizAuthStateProvider.SetLoginAsync(loggedInUser);
+
             NavigationManager.NavigateTo("/");
 
         }
