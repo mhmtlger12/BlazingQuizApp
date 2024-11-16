@@ -28,7 +28,7 @@ namespace BlazingQuiz.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            //Yönetici kullanıcımız
+            //Yönetici kullanıcımız. DB oluşuruken vaersayılan olarak bir yönetici atıyoruz.
             var adminUser = new User
             {
                 Name = "Mehmet Güler",
