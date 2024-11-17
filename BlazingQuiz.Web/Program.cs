@@ -17,7 +17,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 //_________________________________________Start:Auth________________________________________________________________________//
 
-builder.Services.AddCascadingAuthenticationState();
+//builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddSingleton<QuizAuthStateProvider>();
 builder.Services.AddSingleton<AuthenticationStateProvider>(sp => sp.GetRequiredService<QuizAuthStateProvider>());
 builder.Services.AddAuthorizationCore();
@@ -42,6 +42,9 @@ static void ConfigureRefit(IServiceCollection services)
         .ConfigureHttpClient(SetHttpClient);
 
     services.AddRefitClient<ICategoryApi>(GetRefitSettings)
+         .ConfigureHttpClient(SetHttpClient);   
+    
+    services.AddRefitClient<IQuizApi>(GetRefitSettings)
          .ConfigureHttpClient(SetHttpClient);
 
     // HTTP istemcisinin temel adresini belirliyoruz

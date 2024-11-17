@@ -29,7 +29,8 @@ builder.Services.AddDbContext<QuizContext>(options =>
 
 // AuthService sýnýfýný baðýmlýlýk olarak kaydeder ve her istek için yeni bir örnek oluþturur. Bu sayede AuthService sýnýfýný DI(dependency injection) konteyneri üzerinden uygulamanýn herhangi bir yerinde kullanabiliriz.
 builder.Services.AddTransient<AuthService>()
-    .AddTransient<CategoryService>();
+    .AddTransient<CategoryService>()
+    .AddTransient<QuizService>();
 
 //_________________________________________End________________________________________________________________________//
 

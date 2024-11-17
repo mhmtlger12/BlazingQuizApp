@@ -1,6 +1,134 @@
 ﻿@page "/admin/add-quiz"
-<h3>AddQuiz</h3>
+@inject IQuizApi QuizApi
+@inject ICategoryApi CategoryApi
+
+@* Test Ekle Formu *@
+<h1 class="text-center mt-4">Test Ekle</h1>
+<hr />
+
+<EditForm Model="_quiz">
+    <DataAnnotationsValidator />
+
+    <div class="container mt-4">
+        <div class="row">
+            @* Kategori Seçimi *@
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Kategori</label>
+                    <InputSelect @bind-Value="_quiz.CategoryId" class="form-control">
+                        <option value="0">Kategori Seç</option>
+                        @foreach (var c in _categories)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => _quiz.CategoryId" class="text-danger" />
+                </div>
+            </div>
+
+            @* Test Adı Girişi *@
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Test Adı</label>
+                    <InputText @bind-Value="_quiz.Name" class="form-control" placeholder="Test adını girin"></InputText>
+                    <ValidationMessage For="() => _quiz.Name" class="text-danger" />
+                </div>
+            </div>
+
+            @* Toplam Soru Sayısı *@
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Toplam Soru</label>
+                    <InputNumber @bind-Value="_quiz.TotalQuestions" class="form-control" placeholder="Toplam soru sayısını girin"></InputNumber>
+                    <ValidationMessage For="() => _quiz.TotalQuestions" class="text-danger" />
+                </div>
+            </div>
+
+            @* Süre Bilgisi *@
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Süre (Dakika)</label>
+                    <InputNumber @bind-Value="_quiz.TimeInMinutes" class="form-control" placeholder="Süreyi dakika olarak girin"></InputNumber>
+                    <ValidationMessage For="() => _quiz.TimeInMinutes" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <hr />
+        @* Sorular Bölümü *@
+        <h4 class="fw-bold mt-4">Sorular</h4>
+        <ol class="list-group list-group-numbered">
+            @foreach (var q in _quiz.Questions)
+            {
+                var random = Guid.NewGuid(); @* Her soru için benzersiz bir key üretimi *@
+                <li class="list-group-item shadow-sm p-3 mb-3 bg-light rounded">
+                    @* Soru Metni *@
+                    <textarea @bind="q.Text" class="form-control mb-3" rows="3" placeholder="Soru metnini girin"></textarea>
+
+                    @* Seçenekler Bölümü *@
+                    <h6 class="fw-bold">Seçenekler</h6>
+                    <ol class="list-group">
+                        @foreach (var o in q.Options)
+                        {
+                            <li class="list-group-item d-flex align-items-center justify-content-between">
+                                <div class="input-group">
+                                    @* Doğru Cevap Seçimi *@
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="radio"
+                                               name="option_radio_@random"
+                                               checked="@o.IsCorrect"
+                                               @onchange="()=>SetOptionAsCorrectAnswer(q,o)" />
+                                    </div>
+                                    @* Seçenek Metni *@
+                                    <input type="text" @bind="o.Text" class="form-control me-2" placeholder="Seçenek metnini girin" />
+                                </div>
+                                @* Seçeneği Silme Butonu *@
+                                <button class="btn btn-danger btn-sm" type="button" @onclick="()=>q.Options.Remove(o)">X</button>
+                            </li>
+                        }
+                    </ol>
+                    @* Yeni Seçenek Ekleme Butonu *@
+                    <div class="text-end">
+                        <button type="button" class="btn btn-sm btn-info mt-2" @onclick="()=>q.Options.Add(new())">+ Seçenek Ekle</button>
+                    </div>
+                </li>
+            }
+        </ol>
+        <div class="mt-3 d-flex justify-content-center">
+            <button type="button" class="btn btn-info" @onclick="()=>_quiz.Questions.Add(GetDefaultEmptyQuestion())">+ Soru Ekle</button>
+        </div>
+
+
+        @* Test Aktifliği Seçimi *@
+        <div class="form-check form-switch mt-4">
+            <InputCheckbox @bind-Value="_quiz.IsActive" class="form-check-input" type="checkbox" role="switch" id="quizIsActive" />
+            <label class="form-check-label fw-bold" for="quizIsActive">Aktif mi?</label>
+        </div>
+    </div>
+</EditForm>
+
 
 @code {
+    private QuizSaveDto _quiz = new();
+    private CategoryDto[] _categories = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var questions = GetDefaultEmptyQuestion();
+        _quiz.Questions = [questions];
+        _categories = await CategoryApi.GetCategoriesAsync();
+    }
+    private QuestionDto GetDefaultEmptyQuestion() => new QuestionDto
+        {
+            Options = [new(), new()]
+        };
+    private void SetOptionAsCorrectAnswer(QuestionDto q, OptionDto o)
+    {
+        foreach (var option in q.Options)
+        {
+            option.IsCorrect =false;
+        }
+        o.IsCorrect = true;
+    }
 
 }
