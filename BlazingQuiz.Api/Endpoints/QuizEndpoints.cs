@@ -6,7 +6,7 @@ namespace BlazingQuiz.Api.Endpoints
     public static class QuizEndpoints
     {
         // Bu yöntem, uygulamanın endpoint rotalarını tanımlamak için genişletilebilir bir yapı sağlar.
-        public static IEndpointRouteBuilder MapQuizEndpoints(this IEndpointRouteBuilder app)
+        public static  IEndpointRouteBuilder MapQuizEndpoints(this IEndpointRouteBuilder app)
         {
             // "/api/quizes" URL'si altında çalışan, yetkilendirme gerektiren bir endpoint grubu oluşturuyoruz.
             var quizGroup = app.MapGroup("/api/quizes").RequireAuthorization();
@@ -26,7 +26,13 @@ namespace BlazingQuiz.Api.Endpoints
                 // Bu metod, sınavın yeni mi yoksa mevcut bir sınav mı olduğuna göre kaydetme veya güncelleme yapar.
                 return Results.Ok(await service.SaveQuizAsync(dto)); // İşlem başarılıysa 200 OK ile sonuç döner.
             });
+            quizGroup.MapGet("", async (QuizService service) =>
+               Results.Ok(await service.GetQuizesAsync()));
 
+            quizGroup.MapGet("{quizId:guid}/questions", async (Guid quizId, QuizService service) =>
+                {
+                    return Results.Ok(await service.GetQuizQuestionsAsync(quizId));
+                });
             // Bu endpoint grubunu tanımlayan app nesnesini döndürüyoruz.
             return app;
         }

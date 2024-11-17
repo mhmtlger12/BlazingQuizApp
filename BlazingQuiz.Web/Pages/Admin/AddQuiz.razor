@@ -5,8 +5,8 @@
 @inject ICategoryApi CategoryApi
 
 @* Test Ekle Formu *@
-<h1 class="text-center mt-4">Test Ekle</h1>
-<hr />
+<h1 class="text-center mt-5 text-primary fw-bold">Test Ekle</h1>
+<hr class="border-primary" />
 
 <EditForm Model="_quiz" OnValidSubmit="SaveQuizAsync">
     <DataAnnotationsValidator />
@@ -15,9 +15,9 @@
         <div class="row">
             @* Kategori Seçimi *@
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Kategori</label>
-                    <InputSelect @bind-Value="_quiz.CategoryId" class="form-control">
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">Kategori</label>
+                    <InputSelect @bind-Value="_quiz.CategoryId" class="form-control shadow-sm">
                         <option value="0">Kategori Seç</option>
                         @foreach (var c in _categories)
                         {
@@ -30,45 +30,46 @@
 
             @* Test Adı Girişi *@
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Test Adı</label>
-                    <InputText @bind-Value="_quiz.Name" class="form-control" placeholder="Test adını girin"></InputText>
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">Test Adı</label>
+                    <InputText @bind-Value="_quiz.Name" class="form-control shadow-sm" placeholder="Test adını girin" />
                     <ValidationMessage For="() => _quiz.Name" class="text-danger" />
                 </div>
             </div>
 
             @* Toplam Soru Sayısı *@
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Toplam Soru</label>
-                    <InputNumber @bind-Value="_quiz.TotalQuestions" class="form-control" placeholder="Toplam soru sayısını girin"></InputNumber>
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">Toplam Soru</label>
+                    <InputNumber @bind-Value="_quiz.TotalQuestions" class="form-control shadow-sm" placeholder="Toplam soru sayısını girin" />
                     <ValidationMessage For="() => _quiz.TotalQuestions" class="text-danger" />
                 </div>
             </div>
 
             @* Süre Bilgisi *@
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Süre (Dakika)</label>
-                    <InputNumber @bind-Value="_quiz.TimeInMinutes" class="form-control" placeholder="Süreyi dakika olarak girin"></InputNumber>
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">Süre (Dakika)</label>
+                    <InputNumber @bind-Value="_quiz.TimeInMinutes" class="form-control shadow-sm" placeholder="Süreyi dakika olarak girin" />
                     <ValidationMessage For="() => _quiz.TimeInMinutes" class="text-danger" />
                 </div>
             </div>
         </div>
 
-        <hr />
+        <hr class="border-primary" />
+
         @* Sorular Bölümü *@
         <h4 class="fw-bold mt-4">Sorular</h4>
         <ol class="list-group list-group-numbered">
             @foreach (var q in _quiz.Questions)
             {
                 var random = Guid.NewGuid(); @* Her soru için benzersiz bir key üretimi *@
-                <li class="list-group-item shadow-sm p-3 mb-3 bg-light rounded">
+                <li class="list-group-item shadow-sm p-3 mb-4 bg-light rounded">
                     @* Soru Metni *@
                     <textarea @bind="q.Text" class="form-control mb-3" rows="3" placeholder="Soru metnini girin"></textarea>
 
                     @* Seçenekler Bölümü *@
-                    <h6 class="fw-bold">Seçenekler</h6>
+                    <h6 class="fw-bold text-secondary">Seçenekler</h6>
                     <ol class="list-group">
                         @foreach (var o in q.Options)
                         {
@@ -89,26 +90,33 @@
                             </li>
                         }
                     </ol>
+
                     @* Yeni Seçenek Ekleme Butonu *@
                     <div class="text-end">
-                        <button type="button" class="btn btn-sm btn-info mt-2" @onclick="()=>q.Options.Add(new())">+ Seçenek Ekle</button>
+                        <button type="button" class="btn btn-info btn-sm mt-2" @onclick="()=>q.Options.Add(new())">+ Seçenek Ekle</button>
                     </div>
                 </li>
             }
         </ol>
+
         <div class="mt-3 d-flex justify-content-center">
-            <button type="button" class="btn btn-info" @onclick="()=>_quiz.Questions.Add(GetDefaultEmptyQuestion())">+ Soru Ekle</button>
+            <button type="button" class="btn btn-info btn-sm" @onclick="()=>_quiz.Questions.Add(GetDefaultEmptyQuestion())">+ Soru Ekle</button>
         </div>
 
         @* Test Aktifliği Seçimi *@
         <div class="form-check form-switch mt-4">
             <InputCheckbox @bind-Value="_quiz.IsActive" class="form-check-input" type="checkbox" role="switch" id="quizIsActive" />
-            <label class="form-check-label fw-bold" for="quizIsActive">Aktif mi?</label>
+            <label class="form-check-label fw-bold text-secondary" for="quizIsActive">Aktif mi?</label>
         </div>
-        <hr />
-        <button type="submit" class="btn btn-success">Testi Kaydet</button>
+
+        <hr class="border-primary" />
+
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-success btn-lg px-4 py-2">Testi Kaydet</button>
+        </div>
     </div>
 </EditForm>
+
 
 @code {
     private QuizSaveDto _quiz = new();
