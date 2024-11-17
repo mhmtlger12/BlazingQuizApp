@@ -1,4 +1,6 @@
 ﻿@page "/admin/add-quiz"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 @inject IQuizApi QuizApi
 @inject ICategoryApi CategoryApi
 
@@ -6,7 +8,7 @@
 <h1 class="text-center mt-4">Test Ekle</h1>
 <hr />
 
-<EditForm Model="_quiz">
+<EditForm Model="_quiz" OnValidSubmit="SaveQuizAsync">
     <DataAnnotationsValidator />
 
     <div class="container mt-4">
@@ -98,15 +100,15 @@
             <button type="button" class="btn btn-info" @onclick="()=>_quiz.Questions.Add(GetDefaultEmptyQuestion())">+ Soru Ekle</button>
         </div>
 
-
         @* Test Aktifliği Seçimi *@
         <div class="form-check form-switch mt-4">
             <InputCheckbox @bind-Value="_quiz.IsActive" class="form-check-input" type="checkbox" role="switch" id="quizIsActive" />
             <label class="form-check-label fw-bold" for="quizIsActive">Aktif mi?</label>
         </div>
+        <hr />
+        <button type="submit" class="btn btn-success">Testi Kaydet</button>
     </div>
 </EditForm>
-
 
 @code {
     private QuizSaveDto _quiz = new();
@@ -114,21 +116,43 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var questions = GetDefaultEmptyQuestion();
-        _quiz.Questions = [questions];
+        _quiz.Questions = [GetDefaultEmptyQuestion()];
         _categories = await CategoryApi.GetCategoriesAsync();
     }
-    private QuestionDto GetDefaultEmptyQuestion() => new QuestionDto
-        {
-            Options = [new(), new()]
-        };
+
+    private QuestionDto GetDefaultEmptyQuestion() => new()
+    {
+        Options = [new(), new()]
+    };
+
     private void SetOptionAsCorrectAnswer(QuestionDto q, OptionDto o)
     {
         foreach (var option in q.Options)
         {
-            option.IsCorrect =false;
+            option.IsCorrect = false;
         }
         o.IsCorrect = true;
     }
 
+    private async Task SaveQuizAsync()
+    {
+        var errorMessage = _quiz.Validate();
+        if (!string.IsNullOrEmpty(errorMessage))
+        {
+            await ShowAlertAsync(errorMessage);
+            return;
+        }
+
+        var response = await QuizApi.SaveQuizAsync(_quiz);
+        if (!response.IsSuccess)
+        {
+            await ShowAlertAsync(response.ErrorMessage);
+            return;
+        }
+
+        NavigationManager.NavigateTo("admin/manage-quizes");
+    }
+
+    private async Task ShowAlertAsync(string message, string title = "Error") =>
+       await JS.InvokeVoidAsync("alert", $"{title}\n{message}");
 }

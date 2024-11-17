@@ -125,7 +125,8 @@ app.UseHttpsRedirection();
 
 //Endpoints dahil ediyoruz.BlazingQuiz.Api\Endpoints\
 app.MapAuthEndpoints()
-    .MapCategoryEndPoints();
+    .MapCategoryEndPoints()
+    .MapQuizEndpoints();
 app.UseAuthentication()
     .UseAuthorization();
 app.UseCors();
