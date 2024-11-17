@@ -1,6 +1,7 @@
 ﻿using BlazingQuiz.Api.Data; // Veritabanı bağlamını ve varlıkları içeren namespace
 using BlazingQuiz.Api.Data.Entities; // Sınav ve sorularla ilgili varlık sınıflarını içerir
 using BlazingQuiz.Shared.DTOs; // Veri transfer nesneleri için namespace
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore; // Entity Framework Core işlevlerini kullanmak için
 
 namespace BlazingQuiz.Api.Services
@@ -108,6 +109,43 @@ namespace BlazingQuiz.Api.Services
 
        })
        .ToArrayAsync();
+
+        public async Task<QuizSaveDto?> GetQuizToEditAsync(Guid quizId)
+        {
+            // Veritabanındaki Quizzes tablosunda, belirtilen quizId'ye sahip sınavı buluyoruz.
+            var quiz = await _context.Quizzes
+                .Where(q => q.Id == quizId) // Filtreleme: Yalnızca belirtilen quizId'ye sahip kayıtlar alınır.
+                .Select(gz => new QuizSaveDto // QuizSaveDto türünde bir projeksiyon oluşturuyoruz.
+                {
+                    Id = gz.Id, // Sınavın benzersiz kimliği.
+                    CategoryId = gz.CategoryId, // Sınavın kategorisinin kimliği.
+                    IsActive = gz.IsActive, // Sınavın aktiflik durumu.
+                    Name = gz.Name, // Sınavın adı.
+                    TimeInMinutes = gz.TimeInMinutes, // Sınav süresi (dakika cinsinden).
+                    TotalQuestions = gz.TotalQuestions, // Sınavdaki toplam soru sayısı.
+
+                    // Sınava ait soruların detaylarını getiriyoruz.
+                    Questions = gz.Questions
+                                .Select(q => new QuestionDto
+                                {
+                                    Id = q.Id, // Soru kimliği.
+                                    Text = q.Text, // Soru metni.
+
+                                    // Soruya ait seçeneklerin detaylarını getiriyoruz.
+                                    Options = q.Options
+                                    .Select(o => new OptionDto
+                                    {
+                                        Text = o.Text, // Seçenek metni.
+                                        Id = o.Id, // Seçenek kimliği.
+                                        IsCorrect = o.IsCorrect // Seçeneğin doğru/yanlış bilgisi.
+                                    }).ToList() // Seçenekleri bir listeye dönüştürüyoruz.
+                                }).ToList() // Soruları bir listeye dönüştürüyoruz.
+                })
+                .FirstOrDefaultAsync(); // Filtrelenen sonuçlardan ilkini alıyoruz (yoksa null döner).
+
+            // Sınav detaylarını döndürüyoruz.
+            return quiz;
+        }
 
     }
 }

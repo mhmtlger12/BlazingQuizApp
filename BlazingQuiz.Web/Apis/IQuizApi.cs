@@ -12,6 +12,9 @@ namespace BlazingQuiz.Web.Apis
         Task<QuizListDto[]> GetQuizesAsync();
         [Get("/api/quizes/{quizId}/questions")]
         Task<QuestionDto[]> GetQuizQuestionsAsync(Guid quizId);
-      
+        [Get("/api/quizes/{quizId}")]
+        Task<QuizSaveDto?> GetQuizToEditAsync(Guid quizId);
+
+
     }
 }

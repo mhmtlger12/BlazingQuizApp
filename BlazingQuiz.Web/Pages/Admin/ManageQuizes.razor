@@ -44,21 +44,22 @@
                             }
                             else
                             {
-                                foreach (var item in _filteredQuizes)
+                                foreach (var q in _filteredQuizes)
                                 {
                                     <tr>
-                                        <td>@item.Name</td>
-                                        <td>@item.CategoryName</td>
-                                        <td>@item.TotalQuestions</td>
-                                        <td>@item.TimeInMinutes</td>
+                                        <td>@q.Name</td>
+                                        <td>@q.CategoryName</td>
+                                        <td>@q.TotalQuestions</td>
+                                        <td>@q.TimeInMinutes</td>
                                         <td>
                                             <div class="d-flex justify-content-around">
-                                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#questionsModal">
+                                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#questionsModal"
+                                                @onclick="()=>ViewQuestionsAsync(q)">
                                                     <i class="bi bi-eye"></i> Görüntüle
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editQuizModal">
+                                                <a href="admin/edit-quiz/@q.Id" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editQuizModal">
                                                     <i class="bi bi-pencil-square"></i> Düzenle
-                                                </button>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -112,6 +113,19 @@
     </div>
 </div>
 
+@if (_showQuestionsModal)
+{
+  <Modal Title="Sorular" ActionButtonText="Ok" OnActionButtonClick="()=>_showQuestionsModal=false"
+  OnCancelClick="()=>_showQuestionsModal=false" Size="ModalSize.Large">
+    @foreach (var q in _viewingQuestions)
+    {
+        <div class="mb-3 shadow p-2 ">
+            @q.Text
+        </div>
+    }
+
+  </Modal>
+}
 
 @code {
     private QuizListDto[] _quizess = [];
@@ -119,6 +133,9 @@
 
     private CategoryDto[] _categories = [];
     private int _selectedcategory;
+
+    private QuestionDto[] _viewingQuestions = [];
+    private bool _showQuestionsModal;
     protected override async Task OnInitializedAsync()
     {
         var quizesTask = QuizApi.GetQuizesAsync();
@@ -133,5 +150,13 @@
         else
             _filteredQuizes = _quizess.Where(q => q.CategoryId == _selectedcategory)
             .ToArray();
+    }
+    private async Task ViewQuestionsAsync(QuizListDto q)
+    {
+        _viewingQuestions = await QuizApi.GetQuizQuestionsAsync(q.Id);
+
+        _viewingQuestions = [.. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions, .. _viewingQuestions];
+        _showQuestionsModal = true;
+
     }
 }

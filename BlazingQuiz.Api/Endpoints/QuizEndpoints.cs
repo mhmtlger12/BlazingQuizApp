@@ -33,6 +33,9 @@ namespace BlazingQuiz.Api.Endpoints
                 {
                     return Results.Ok(await service.GetQuizQuestionsAsync(quizId));
                 });
+            quizGroup.MapGet("{quizId:guid}", async (Guid quizId, QuizService service) =>
+                    Results.Ok(await service.GetQuizToEditAsync(quizId)));
+
             // Bu endpoint grubunu tanımlayan app nesnesini döndürüyoruz.
             return app;
         }
